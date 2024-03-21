@@ -1,0 +1,64 @@
+@baseUrl = http://localhost:8082
+
+### 
+POST {{baseUrl}}/api/addTask
+Content-Type: application/json; charset=utf-8
+
+{
+   "cron": "*/1 * * * * ?",
+   "url": "https://httpbin.org/get"
+}
+
+### 
+POST {{baseUrl}}/api/getTask
+Content-Type: application/json; charset=utf-8
+
+{
+  "taskId": "9fd85681762007a2"
+}
+### 
+POST {{baseUrl}}/api/updateTask
+Content-Type: application/json; charset=utf-8
+
+{
+  "taskId": "9fd85681762007a2",
+  "cron": "* * * * * ?"
+}
+
+
+###
+
+POST {{baseUrl}}/api/removeTask
+Content-Type: application/json; charset=utf-8
+
+{
+  "taskId": "9fd85681762007a2"
+}
+### 
+
+POST {{baseUrl}}/api/getTaskList
+Content-Type: application/json; charset=utf-8
+
+{
+   
+}
+
+### 
+
+POST {{baseUrl}}/api/startTask
+Content-Type: application/json; charset=utf-8
+
+{
+    "taskId": "9fd85681762007a2"
+}
+
+
+
+### 
+
+POST {{baseUrl}}/api/stopTask
+Content-Type: application/json; charset=utf-8
+
+{
+   "taskId": "5398be172b02c1dd"
+}
