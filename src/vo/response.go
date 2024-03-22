@@ -21,3 +21,11 @@ func Success(c *gin.Context, data interface{}) {
 		Data:    data,
 	})
 }
+
+func Error(c *gin.Context, code int, msg string) {
+	c.JSON(http.StatusOK, Response{
+		Code:    code,
+		Message: msg,
+		Data:    nil,
+	})
+}

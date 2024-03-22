@@ -20,9 +20,10 @@ func main() {
 	// 注册路由
 	router.RegistRouter(app)
 
-	//
+	// 数据库迁移
 	config.Migrate()
 
+	// 初始化定时任务
 	service.InitCron()
 
 	// 监听并在127.0.0.1:8082 上启动服务
