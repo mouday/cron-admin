@@ -8,6 +8,7 @@ import (
 /* 注册路由 */
 func RegistRouter(app *gin.Engine) {
 
+	// task
 	app.POST("/api/addTask", api.AddTask)
 	app.POST("/api/updateTask", api.UpdateTask)
 	app.POST("/api/removeTask", api.RemoveTask)
@@ -15,4 +16,7 @@ func RegistRouter(app *gin.Engine) {
 	app.POST("/api/getTaskList", api.GetTaskList)
 	app.POST("/api/startTask", api.StartTask)
 	app.POST("/api/stopTask", api.StopTask)
+
+	// log
+	app.POST("/api/getTaskLogList", api.GetTaskLogList)
 }

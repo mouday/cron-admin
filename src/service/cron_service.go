@@ -5,7 +5,9 @@ import (
 	"sync"
 	"time"
 
+	"github.com/levigross/grequests"
 	"github.com/mouday/cron-admin/src/config"
+	"github.com/mouday/cron-admin/src/enums"
 	"github.com/mouday/cron-admin/src/model"
 	"github.com/mouday/cron-admin/src/utils"
 	"github.com/robfig/cron"
@@ -58,13 +60,23 @@ func job(params *JobParams) func() {
 		fmt.Println("任务运行：", now.Format(DATATIME_FORMAT))
 
 		// "http://httpbin.org/get"
-		// resp, _ := grequests.Get(params.Url, nil)
+		resp, err := grequests.Get(params.Url, nil)
 
-		// if resp.Ok {
-		// 	fmt.Println(resp.String())
-		// } else {
-		// 	fmt.Println(resp.Error)
-		// }
+		status := enums.TaskStatusStartError
+		if err == nil && resp.Ok {
+			status = enums.TaskStatusStartSuccess
+		}
+
+		// database
+		db := config.GetDB()
+
+		item := model.TaskLogModel{}
+		item.TaskLogId = utils.GetUuidV4()
+		item.TaskId = params.TaskId
+		item.Status = status
+
+		db.Create(&item)
+
 	}
 }
 

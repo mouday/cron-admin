@@ -12,6 +12,11 @@ func Get16MD5Encode(data string) string {
 }
 
 // 获取uuid
+func GetUuidV4() string {
+	return uuid.NewV4().String()
+}
+
+// 获取uuid
 func GetUuid() string {
 	u := uuid.NewV4()
 	return Get16MD5Encode(u.String())

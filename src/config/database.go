@@ -22,5 +22,5 @@ func GetDB() *gorm.DB {
 // 迁移数据库
 func Migrate() {
 	db := GetDB()
-	db.AutoMigrate(&model.TaskModel{})
+	db.AutoMigrate(&model.TaskModel{}, &model.TaskLogModel{})
 }
