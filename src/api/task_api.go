@@ -42,14 +42,10 @@ func UpdateTask(ctx *gin.Context) {
 	row := &model.TaskModel{}
 	ctx.BindJSON(&row)
 
-	// jobParams := service.AddTask(params)
-
-	// ctx.JSON(http.StatusOK, jobParams)
-
-	service.ChangeTaskStatus(row.TaskId, row.Status)
-
 	db := config.GetDB()
 	db.Model(&model.TaskModel{}).Where("taskId = ?", row.TaskId).Updates(&row)
+
+	service.ChangeTaskStatus(row.TaskId, row.Status)
 
 	vo.Success(ctx, nil)
 }
@@ -60,9 +56,9 @@ func UpdateTaskStatus(ctx *gin.Context) {
 
 	db := config.GetDB()
 
-	service.ChangeTaskStatus(params.TaskId, params.Status)
-
 	db.Model(&model.TaskModel{}).Where("task_id = ?", params.TaskId).Update("status", params.Status)
+
+	service.ChangeTaskStatus(params.TaskId, params.Status)
 
 	vo.Success(ctx, nil)
 }
