@@ -1,3 +1,5 @@
 *.db
 .idea
 *.iml
+*.log
+tmp/

@@ -3,12 +3,12 @@ package model
 import "github.com/mouday/cron-admin/src/utils"
 
 type TaskModel struct {
-	ID         uint            `json:"id"`
+	Id         uint            `json:"-"`
 	Title      string          `json:"title"`
-	TaskId     string          `gorm:"index" json:"taskId"`
 	Cron       string          `json:"cron"`
 	Url        string          `json:"url"`
-	Running    bool            `json:"running"`
+	Status     bool            `json:"status"`
+	TaskId     string          `gorm:"index" json:"taskId"`
 	CreateTime utils.LocalTime `gorm:"type:datetime;autoCreateTime" json:"createTime"`
 	UpdateTime utils.LocalTime `gorm:"type:datetime;autoUpdateTime" json:"updateTime"`
 }

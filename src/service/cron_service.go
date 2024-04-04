@@ -20,17 +20,12 @@ func InitCron() {
 	db := config.GetDB()
 	var list = []model.TaskModel{}
 
-	db.Model(&model.TaskModel{}).Where("running = ?", true).Find(&list)
+	db.Model(&model.TaskModel{}).Where("status = ?", true).Find(&list)
 
 	for index := range list {
-		taskModel := list[index]
-		params := &JobParams{}
+		row := list[index]
 
-		params.Cron = taskModel.Cron
-		params.TaskId = taskModel.TaskId
-		params.Url = taskModel.Url
-
-		AddTask(params)
+		StartTask(row)
 	}
 }
 
@@ -38,163 +33,80 @@ func InitCron() {
 var CronArray sync.Map
 
 type JobParams struct {
-	TaskId  string `json:"taskId"`
-	Cron    string `json:"cron" `
-	Url     string `json:"url" `
-	Running bool   `json:"running" `
+	TaskId string `json:"taskId"`
+	Cron   string `json:"cron" `
+	Url    string `json:"url" `
+	Title  string `json:"title" `
 }
 
-type Job struct {
-	Params *JobParams
-	Cron   *cron.Cron
-}
-
-func task() {
-	now := time.Now()
-	fmt.Println("任务运行：", now.Format(DATATIME_FORMAT))
-}
-
-func job(params *JobParams) func() {
+func newJob(params JobParams) func() {
 	return func() {
 		now := time.Now()
 		fmt.Println("任务运行：", now.Format(DATATIME_FORMAT))
 
-		// "http://httpbin.org/get"
-		resp, err := grequests.Get(params.Url, nil)
+		item := model.TaskLogModel{}
+		item.TaskLogId = utils.GetUuidV4()
+		item.TaskId = params.TaskId
+		item.Title = params.Title
+		item.Url = params.Url
+
+		// http://httpbin.org/get
+		options := &grequests.RequestOptions{
+			JSON: item,
+		}
+
+		resp, err := grequests.Post(params.Url, options)
 
 		status := enums.TaskStatusStartError
 		if err == nil && resp.Ok {
 			status = enums.TaskStatusStartSuccess
 		}
 
-		// database
-		db := config.GetDB()
-
-		item := model.TaskLogModel{}
-		item.TaskLogId = utils.GetUuidV4()
-		item.TaskId = params.TaskId
 		item.Status = status
 
+		// database
+		db := config.GetDB()
 		db.Create(&item)
 
 	}
 }
 
-func AddTask(params *JobParams) *JobParams {
-	if params.TaskId == "" {
-		params.TaskId = utils.GetUuid()
-	} else {
-		oldParams := GetTask(params.TaskId)
+func StopTask(taskId string) {
+	cronInstance, ok := CronArray.Load(taskId)
 
-		if params.Url == "" {
-			params.Url = oldParams.Url
-		}
+	if ok {
+		cronInstance.(*cron.Cron).Stop()
+	}
 
-		if params.Cron == "" {
-			params.Cron = oldParams.Cron
-		}
+	CronArray.Delete(taskId)
+}
 
-		RemoveTask(params.TaskId)
+func StartTask(row model.TaskModel) {
+	// 获取指定cron定时器关闭
+	StopTask(row.TaskId)
+
+	params := JobParams{
+		TaskId: row.TaskId,
+		Cron:   row.Cron,
+		Url:    row.Url,
+		Title:  row.Title,
 	}
 
 	// 每秒执行一次
-	c := cron.New()
-	c.AddFunc(params.Cron, job(params))
-	c.Start()
+	cronInstance := cron.New()
+	cronInstance.AddFunc(params.Cron, newJob(params))
+	cronInstance.Start()
 
-	params.Running = true
-
-	job := Job{
-		Params: params,
-		Cron:   c,
-	}
-
-	CronArray.Store(params.TaskId, job)
-
-	// database
-	db := config.GetDB()
-
-	item := model.TaskModel{}
-	item.Cron = params.Cron
-	item.Url = params.Url
-	item.TaskId = params.TaskId
-	item.Running = params.Running
-
-	db.Create(&item)
-
-	return params
+	CronArray.Store(row.TaskId, cronInstance)
 }
 
-func RemoveTask(taskId string) {
-	// 获取指定cron定时器关闭
-	StopTask(taskId)
-	CronArray.Delete(taskId)
-
-	// database
-	db := config.GetDB()
-
-	task := model.TaskModel{}
-
-	db.Model(&model.TaskModel{}).Where("task_id = ?", taskId).Delete(&task)
-}
-
-func StopTask(taskId string) {
-	// 获取指定cron定时器关闭
-
-	task, ok := CronArray.Load(taskId)
-	if ok {
-		job := task.(Job)
-		job.Cron.Stop()
-		job.Params.Running = false
-	}
-
-	CronArray.Store(taskId, task)
-
-	// database
-	db := config.GetDB()
-	taskModel := model.TaskModel{}
-	taskModel.Running = false
-	db.Model(&model.TaskModel{}).Where("task_id = ?", taskId).Updates(&taskModel)
-}
-
-func StartTask(taskId string) {
-	// 获取指定cron定时器关闭
-
-	task, ok := CronArray.Load(taskId)
-	if ok {
-
-		job := task.(Job)
-		job.Cron.Start()
-
-		job.Params.Running = true
-	}
-
-	CronArray.Store(taskId, task)
-
-	// database
-	db := config.GetDB()
-	taskModel := model.TaskModel{}
-	taskModel.Running = true
-	db.Model(&model.TaskModel{}).Where("task_id = ?", taskId).Updates(&taskModel)
-}
-
-func GetTask(taskId string) *JobParams {
-	task, ok := CronArray.Load(taskId)
-
-	if ok {
-		return task.(Job).Params
+func ChangeTaskStatus(taskId string, status bool) {
+	if status {
+		db := config.GetDB()
+		row := &model.TaskModel{}
+		db.Model(&model.TaskModel{}).Where("task_id = ?", taskId).Find(&row)
+		StartTask(*row)
 	} else {
-		return &JobParams{}
+		StopTask(taskId)
 	}
-}
-
-func GetTaskList() []*JobParams {
-	taskList := []*JobParams{}
-	CronArray.Range(func(key, value interface{}) bool {
-		job := value.(Job)
-		taskList = append(taskList, job.Params)
-		return true
-	})
-
-	return taskList
 }

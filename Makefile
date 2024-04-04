@@ -29,4 +29,5 @@ clean:
 
 .PHONY: dev
 dev:
-	go run ./src/main.go
+	# go run ./src/main.go
+	air

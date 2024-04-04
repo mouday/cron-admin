@@ -6,6 +6,8 @@ type TaskLogModel struct {
 	ID         uint            `json:"id"`
 	TaskLogId  string          `gorm:"index" json:"taskLogId"`
 	TaskId     string          `json:"taskId"`
+	Title      string          `json:"title"`
+	Url        string          `json:"url"`
 	Status     int             `json:"status"`
 	CreateTime utils.LocalTime `gorm:"type:datetime;autoCreateTime" json:"createTime"`
 	UpdateTime utils.LocalTime `gorm:"type:datetime;autoUpdateTime" json:"updateTime"`

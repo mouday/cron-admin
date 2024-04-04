@@ -1,100 +1,126 @@
 package api
 
 import (
-	"encoding/json"
-	"fmt"
-
 	"github.com/gin-gonic/gin"
+	"github.com/mouday/cron-admin/src/config"
+	"github.com/mouday/cron-admin/src/form"
+	"github.com/mouday/cron-admin/src/model"
 	"github.com/mouday/cron-admin/src/service"
+	"github.com/mouday/cron-admin/src/utils"
 	"github.com/mouday/cron-admin/src/vo"
 )
 
+type TaskForm struct {
+	TaskId string `json:"taskId"`
+	Title  string `json:"title"`
+	Cron   string `json:"cron" `
+	Url    string `json:"url" `
+	Status bool   `json:"status" `
+}
+
 func AddTask(ctx *gin.Context) {
-	params := &service.JobParams{}
+	form := &TaskForm{}
+	ctx.BindJSON(&form)
 
-	// 解析json数据
-	// rawData, _ := ctx.GetRawData()
+	row := &model.TaskModel{
+		Title:  form.Title,
+		Cron:   form.Cron,
+		Url:    form.Url,
+		Status: form.Status,
+		TaskId: utils.GetUuidV4(),
+	}
 
-	// json.Unmarshal(rawData, &params)
-	ctx.BindJSON(&params)
+	service.ChangeTaskStatus(row.TaskId, row.Status)
 
-	fmt.Println(params)
+	db := config.GetDB()
+	db.Model(&model.TaskModel{}).Create(&row)
 
-	jobParams := service.AddTask(params)
-
-	// ctx.JSON(http.StatusOK, jobParams)
-	vo.Success(ctx, jobParams)
+	vo.Success(ctx, nil)
 }
 
 func UpdateTask(ctx *gin.Context) {
-	params := &service.JobParams{}
+	row := &model.TaskModel{}
+	ctx.BindJSON(&row)
 
-	// 解析json数据
-	rawData, _ := ctx.GetRawData()
-
-	json.Unmarshal(rawData, &params)
-	fmt.Println(params)
-
-	jobParams := service.AddTask(params)
+	// jobParams := service.AddTask(params)
 
 	// ctx.JSON(http.StatusOK, jobParams)
-	vo.Success(ctx, jobParams)
+
+	service.ChangeTaskStatus(row.TaskId, row.Status)
+
+	db := config.GetDB()
+	db.Model(&model.TaskModel{}).Where("taskId = ?", row.TaskId).Updates(&row)
+
+	vo.Success(ctx, nil)
+}
+
+func UpdateTaskStatus(ctx *gin.Context) {
+	params := &model.TaskModel{}
+	ctx.BindJSON(&params)
+
+	db := config.GetDB()
+
+	service.ChangeTaskStatus(params.TaskId, params.Status)
+
+	db.Model(&model.TaskModel{}).Where("task_id = ?", params.TaskId).Update("status", params.Status)
+
+	vo.Success(ctx, nil)
 }
 
 func RemoveTask(ctx *gin.Context) {
-	params := &service.JobParams{}
+	row := &model.TaskModel{}
+	ctx.BindJSON(&row)
 
-	// 解析json数据
-	rawData, _ := ctx.GetRawData()
+	db := config.GetDB()
 
-	json.Unmarshal(rawData, &params)
+	db.Where("task_id = ?", row.TaskId).Delete(&model.TaskModel{})
 
-	service.RemoveTask(params.TaskId)
+	// service.RemoveTask(params.TaskId)
 	// ctx.String(http.StatusOK, "hello")
 	vo.Success(ctx, nil)
 }
 
 func GetTask(ctx *gin.Context) {
-	params := &service.JobParams{}
+	// params := &service.JobParams{}
 
-	// 解析json数据
-	rawData, _ := ctx.GetRawData()
+	// // 解析json数据
+	// rawData, _ := ctx.GetRawData()
 
-	json.Unmarshal(rawData, &params)
+	// json.Unmarshal(rawData, &params)
 
-	task := service.GetTask(params.TaskId)
+	// task := service.GetTask(params.TaskId)
+	row := &model.TaskModel{}
+	ctx.BindJSON(&row)
+
+	db := config.GetDB()
+
+	db.Model(&model.TaskModel{}).Where("task_id = ?", row.TaskId).Find(&row)
+
 	// ctx.JSON(http.StatusOK, task)
-	vo.Success(ctx, task)
+	vo.Success(ctx, row)
 }
 
 func GetTaskList(ctx *gin.Context) {
-	taskList := service.GetTaskList()
-	// ctx.JSON(http.StatusOK, taskList)
-	vo.Success(ctx, taskList)
-}
 
-func StartTask(ctx *gin.Context) {
-	params := &service.JobParams{}
+	params := &form.PageForm{
+		Page:   1,
+		Size:   10,
+		Status: 0,
+	}
 
-	// 解析json数据
-	rawData, _ := ctx.GetRawData()
+	ctx.BindJSON(&params)
 
-	json.Unmarshal(rawData, &params)
+	db := config.GetDB()
 
-	service.StartTask(params.TaskId)
-	// ctx.JSON(http.StatusOK, "ok")
-	vo.Success(ctx, nil)
-}
+	taskList := []model.TaskModel{}
+	var count int64
 
-func StopTask(ctx *gin.Context) {
-	params := &service.JobParams{}
+	db.Model(&model.TaskModel{}).Count(&count)
 
-	// 解析json数据
-	rawData, _ := ctx.GetRawData()
+	db.Model(&model.TaskModel{}).Order("id desc").Limit(params.Size).Offset(params.PageOffset()).Find(&taskList)
 
-	json.Unmarshal(rawData, &params)
-
-	service.StopTask(params.TaskId)
-	// ctx.JSON(http.StatusOK, "ok")
-	vo.Success(ctx, nil)
+	vo.Success(ctx, gin.H{
+		"list":  taskList,
+		"total": count,
+	})
 }
