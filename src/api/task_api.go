@@ -30,10 +30,10 @@ func AddTask(ctx *gin.Context) {
 		TaskId: utils.GetUuidV4(),
 	}
 
-	service.ChangeTaskStatus(row.TaskId, row.Status)
-
 	db := config.GetDB()
 	db.Model(&model.TaskModel{}).Create(&row)
+
+	service.ChangeTaskStatus(row.TaskId, row.Status)
 
 	vo.Success(ctx, nil)
 }
