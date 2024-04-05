@@ -2,4 +2,6 @@
 .idea
 *.iml
 *.log
+logs/
 tmp/
+public/
