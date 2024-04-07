@@ -43,7 +43,7 @@ func UpdateTask(ctx *gin.Context) {
 	ctx.BindJSON(&row)
 
 	db := config.GetDB()
-	db.Model(&model.TaskModel{}).Where("taskId = ?", row.TaskId).Updates(&row)
+	db.Model(&model.TaskModel{}).Where("task_id = ?", row.TaskId).Updates(&row)
 
 	service.ChangeTaskStatus(row.TaskId, row.Status)
 
