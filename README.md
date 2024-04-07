@@ -30,3 +30,6 @@ Cron Admin 仅负责定时任务的调度，不负责定时任务的执行
 
 下载对应平台的可以执行文件，运行即可，不需要安装任何依赖
 
+已实现的runner
+
+- Python: https://github.com/mouday/cron-runner-python
