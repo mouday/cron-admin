@@ -1,9 +1,10 @@
 package form
 
 type PageForm struct {
-	Page   int `json:"page"`
-	Size   int `json:"size"`
-	Status int `json:"status"`
+	Page   int    `json:"page"`
+	Size   int    `json:"size"`
+	Status int    `json:"status"`
+	TaskId string `json:"taskId"`
 }
 
 func (pageForm PageForm) PageOffset() int {

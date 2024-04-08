@@ -3,7 +3,7 @@ package model
 import "github.com/mouday/cron-admin/src/utils"
 
 type TaskLogModel struct {
-	ID         uint            `json:"id"`
+	ID         uint            `json:"-"`
 	TaskLogId  string          `gorm:"index" json:"taskLogId"`
 	TaskId     string          `json:"taskId"`
 	Title      string          `json:"title"`

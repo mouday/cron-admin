@@ -18,6 +18,7 @@ func GetTaskLogList(ctx *gin.Context) {
 		Page:   1,
 		Size:   10,
 		Status: 0,
+		TaskId: "",
 	}
 
 	ctx.BindJSON(&params)
@@ -27,16 +28,18 @@ func GetTaskLogList(ctx *gin.Context) {
 	taskList := []model.TaskLogModel{}
 
 	var count int64
+	tx := db.Model(&model.TaskLogModel{})
 
 	if params.Status != 0 {
-		db.Model(&model.TaskLogModel{}).Where("status = ?", params.Status).Count(&count)
-		db.Model(&model.TaskLogModel{}).Where("status = ?", params.Status).Order("id desc").Limit(params.Size).Offset(params.PageOffset()).Find(&taskList)
-	} else {
-		db.Model(&model.TaskLogModel{}).Count(&count)
-		db.Model(&model.TaskLogModel{}).Order("id desc").Limit(params.Size).Offset(params.PageOffset()).Find(&taskList)
-
+		tx = tx.Where("status = ?", params.Status)
 	}
 
+	if params.TaskId != "" {
+		tx = tx.Where("task_id = ?", params.TaskId)
+	}
+
+	tx.Count(&count)
+	tx.Order("id desc").Limit(params.Size).Offset(params.PageOffset()).Find(&taskList)
 	// ctx.JSON(http.StatusOK, taskList)
 	vo.Success(ctx, gin.H{
 		"list":  taskList,
