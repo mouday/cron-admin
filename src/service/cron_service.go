@@ -33,10 +33,11 @@ func InitCron() {
 var CronArray sync.Map
 
 type JobParams struct {
-	TaskId string `json:"taskId"`
-	Cron   string `json:"cron" `
-	Url    string `json:"url" `
-	Title  string `json:"title" `
+	TaskId   string `json:"taskId"`
+	Cron     string `json:"cron" `
+	Url      string `json:"url" `
+	Title    string `json:"title" `
+	RunnerId string `json:"runnerId" `
 }
 
 func newJob(params JobParams) func() {
@@ -48,14 +49,15 @@ func newJob(params JobParams) func() {
 		item.TaskLogId = utils.GetUuidV4()
 		item.TaskId = params.TaskId
 		item.Title = params.Title
-		item.Url = params.Url
+		item.RunnerId = params.RunnerId
+		item.TaskName = "run_job"
 
 		// http://httpbin.org/get
 		options := &grequests.RequestOptions{
 			JSON: item,
 		}
 
-		resp, err := grequests.Post(params.Url, options)
+		resp, err := grequests.Post("http://127.0.0.1:5000/api/startTask", options)
 
 		status := enums.TaskStatusStartError
 		if err == nil && resp.Ok {
@@ -88,7 +90,7 @@ func StartTask(row model.TaskModel) {
 	params := JobParams{
 		TaskId: row.TaskId,
 		Cron:   row.Cron,
-		Url:    row.Url,
+		Url:    "",
 		Title:  row.Title,
 	}
 

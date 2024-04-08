@@ -13,6 +13,6 @@ type RunnerModel struct {
 }
 
 // 自定义表名
-func (TaskModel) TableName() string {
+func (RunnerModel) TableName() string {
 	return "tb_runner"
 }

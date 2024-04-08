@@ -51,20 +51,24 @@ type ReportTaskStatusForm struct {
 }
 
 func ReportTaskStatus(ctx *gin.Context) {
-	params := &ReportTaskStatusForm{}
-	ctx.BindJSON(&params)
+	list := &[]ReportTaskStatusForm{}
+	ctx.BindJSON(&list)
 
-	fmt.Println("params", params)
+	fmt.Println("list", list)
 
 	db := config.GetDB()
+	for _, params := range *list {
 
-	db.Model(&model.TaskLogModel{}).Where("task_log_id = ?", params.TaskLogId).Update("status", params.Status)
+		db.Model(&model.TaskLogModel{}).Where("task_log_id = ?", params.TaskLogId).Update("status", params.Status)
 
-	// write log
-	row := model.TaskLogModel{}
-	db.Model(&model.TaskLogModel{}).Where("task_log_id = ?", params.TaskLogId).Find(&row)
+		// write log
+		row := model.TaskLogModel{}
+		db.Model(&model.TaskLogModel{}).Where("task_log_id = ?", params.TaskLogId).Find(&row)
 
-	service.AppendLog(row.TaskId, params.TaskLogId, params.Text)
+		service.AppendLog(row.TaskId, params.TaskLogId, params.Text)
+	}
+
+	vo.Success(ctx, nil)
 }
 
 func GetTaskLogDetail(ctx *gin.Context) {

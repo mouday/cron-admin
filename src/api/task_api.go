@@ -23,9 +23,9 @@ func AddTask(ctx *gin.Context) {
 	ctx.BindJSON(&form)
 
 	row := &model.TaskModel{
-		Title:  form.Title,
-		Cron:   form.Cron,
-		Url:    form.Url,
+		Title: form.Title,
+		Cron:  form.Cron,
+		// Url:    form.Url,
 		Status: form.Status,
 		TaskId: utils.GetUuidV4(),
 	}
