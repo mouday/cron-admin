@@ -11,6 +11,14 @@ func RegistRouter(app *gin.Engine) {
 	// auth
 	app.POST("/api/login", api.Login)
 
+	// runner
+	app.POST("/api/addRunner", api.AddRunner)
+	app.POST("/api/updateRunner", api.UpdateRunner)
+	app.POST("/api/updateRunnerStatus", api.UpdateRunnerStatus)
+	app.POST("/api/removeRunner", api.RemoveRunner)
+	app.POST("/api/getRunner", api.GetRunner)
+	app.POST("/api/getRunnerList", api.GetRunnerList)
+
 	// task
 	app.POST("/api/addTask", api.AddTask)
 	app.POST("/api/updateTask", api.UpdateTask)

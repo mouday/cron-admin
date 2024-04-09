@@ -4,6 +4,7 @@ import "github.com/mouday/cron-admin/src/utils"
 
 type RunnerModel struct {
 	Id          uint            `json:"-"`
+	RunnerId    string          `json:"runnerId" gorm:"index" `
 	Title       string          `json:"title"`
 	Host        string          `json:"host"`
 	AccessToken string          `json:"accessToken"`
