@@ -8,6 +8,9 @@ import (
 /* 注册路由 */
 func RegistRouter(app *gin.Engine) {
 
+	// auth
+	app.POST("/api/login", api.Login)
+
 	// task
 	app.POST("/api/addTask", api.AddTask)
 	app.POST("/api/updateTask", api.UpdateTask)
