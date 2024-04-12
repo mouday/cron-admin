@@ -1,10 +1,13 @@
 package handler
 
 import (
+	"fmt"
 	"log"
 	"runtime/debug"
 
 	"github.com/gin-gonic/gin"
+	"github.com/mouday/cron-admin/src/config"
+	"github.com/mouday/cron-admin/src/utils"
 	"github.com/mouday/cron-admin/src/vo"
 )
 
@@ -38,5 +41,39 @@ func errorToString(r interface{}) string {
 		return v.Error()
 	default:
 		return r.(string)
+	}
+}
+
+var ALLOW_URLS = []string{
+	"/api/login",
+}
+
+func InArray(url string, urls []string) bool {
+	for _, v := range urls {
+		if v == url {
+			return true
+		}
+	}
+	return false
+}
+
+func AuthMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+
+		url := c.Request.RequestURI
+		fmt.Println("url:", c.Request.RequestURI)
+
+		if !InArray(url, ALLOW_URLS) {
+			token := c.Request.Header.Get("X-Token")
+			fmt.Println("token:", token)
+
+			if token == "" || !utils.VerifyToken(token, config.SCERET) {
+				vo.Error(c, 403, "Token验证失败")
+				c.Abort()
+				return
+			}
+		}
+
+		c.Next()
 	}
 }

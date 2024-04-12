@@ -11,11 +11,12 @@ import (
 )
 
 type TaskForm struct {
-	TaskId string `json:"taskId"`
-	Title  string `json:"title"`
-	Cron   string `json:"cron" `
-	Url    string `json:"url" `
-	Status bool   `json:"status" `
+	TaskId   string `json:"taskId"`
+	Title    string `json:"title"`
+	Cron     string `json:"cron" `
+	TaskName string `json:"taskName" `
+	RunnerId string `json:"runnerId" `
+	Status   bool   `json:"status" `
 }
 
 func AddTask(ctx *gin.Context) {
@@ -23,11 +24,12 @@ func AddTask(ctx *gin.Context) {
 	ctx.BindJSON(&form)
 
 	row := &model.TaskModel{
-		Title: form.Title,
-		Cron:  form.Cron,
-		// Url:    form.Url,
-		Status: form.Status,
-		TaskId: utils.GetUuidV4(),
+		Title:    form.Title,
+		Cron:     form.Cron,
+		RunnerId: form.RunnerId,
+		TaskName: form.TaskName,
+		Status:   form.Status,
+		TaskId:   utils.GetUuidV4(),
 	}
 
 	db := config.GetDB()

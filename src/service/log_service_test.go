@@ -5,5 +5,5 @@ import (
 )
 
 func TestGetUuid(t *testing.T) {
-	AppendLog("/yyy/xxx", "123")
+	AppendLog("/yyy/xxx", "123", "xxx")
 }

@@ -12,7 +12,7 @@ import (
 type RunnerForm struct {
 	RunnerId    string `json:"runnerId"`
 	Title       string `json:"title"`
-	Host        string `json:"host" `
+	Url         string `json:"url" `
 	AccessToken string `json:"accessToken" `
 	Status      bool   `json:"status" `
 }
@@ -23,7 +23,7 @@ func AddRunner(ctx *gin.Context) {
 
 	row := &model.RunnerModel{
 		Title:       form.Title,
-		Host:        form.Host,
+		Url:         form.Url,
 		AccessToken: form.AccessToken,
 		Status:      form.Status,
 		RunnerId:    utils.GetUuidV4(),
@@ -41,7 +41,7 @@ func UpdateRunner(ctx *gin.Context) {
 
 	data := &model.RunnerModel{
 		Title:       form.Title,
-		Host:        form.Host,
+		Url:         form.Url,
 		AccessToken: form.AccessToken,
 		Status:      form.Status,
 	}
@@ -97,12 +97,12 @@ func GetRunnerList(ctx *gin.Context) {
 
 	db := config.GetDB()
 
-	taskList := []model.RunnerModel{}
+	taskList := &[]model.RunnerModel{}
 	var count int64
 
 	db.Model(&model.RunnerModel{}).Count(&count)
 
-	db.Model(&model.RunnerModel{}).Order("id desc").Limit(form.Size).Offset(form.PageOffset()).Find(&taskList)
+	db.Model(&model.RunnerModel{}).Order("id desc").Find(&taskList)
 
 	vo.Success(ctx, gin.H{
 		"list":  taskList,

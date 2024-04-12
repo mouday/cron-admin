@@ -6,7 +6,7 @@ type RunnerModel struct {
 	Id          uint            `json:"-"`
 	RunnerId    string          `json:"runnerId" gorm:"index" `
 	Title       string          `json:"title"`
-	Host        string          `json:"host"`
+	Url         string          `json:"url"`
 	AccessToken string          `json:"accessToken"`
 	Status      bool            `json:"status"`
 	CreateTime  utils.LocalTime `gorm:"type:datetime;autoCreateTime" json:"createTime"`

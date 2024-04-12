@@ -2,17 +2,16 @@ package model
 
 import "github.com/mouday/cron-admin/src/utils"
 
-type UserModel struct {
+// 配置
+type ConfigModel struct {
 	Id         uint            `json:"-"`
-	UserId     string          `gorm:"index" json:"userId"`
-	Username   string          `gorm:"index" json:"username"`
-	Password   string          `json:"password"`
-	Status     bool            `json:"status"`
+	Key        string          `json:"key"  gorm:"index"`
+	Value      string          `json:"value"`
 	CreateTime utils.LocalTime `gorm:"type:datetime;autoCreateTime" json:"createTime"`
 	UpdateTime utils.LocalTime `gorm:"type:datetime;autoUpdateTime" json:"updateTime"`
 }
 
 // 自定义表名
-func (UserModel) TableName() string {
-	return "tb_user"
+func (ConfigModel) TableName() string {
+	return "tb_config"
 }

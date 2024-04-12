@@ -23,11 +23,16 @@ func main() {
 	// 全局异常捕获
 	app.Use(handler.Recover)
 
+	app.Use(handler.AuthMiddleware())
+
 	// 注册路由
 	router.RegistRouter(app)
 
 	// 数据库迁移
 	config.Migrate()
+
+	// 初始化数据
+	config.InitData()
 
 	// 初始化定时任务
 	service.InitCron()

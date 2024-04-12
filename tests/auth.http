@@ -1,0 +1,10 @@
+@baseUrl = http://localhost:8082
+
+### 
+POST {{baseUrl}}/api/login
+Content-Type: application/json; charset=utf-8
+
+{
+   "username": "admin",
+   "password": "123456"
+}
