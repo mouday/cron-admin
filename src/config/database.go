@@ -62,11 +62,11 @@ func InitUserData() {
 	db := GetDB()
 
 	userRow := &model.UserModel{}
-	db.Model(&model.UserModel{}).Where("username = ?", "root").First(&userRow)
+	db.Model(&model.UserModel{}).Where("username = ?", "admin").First(&userRow)
 
 	if userRow.Username == "" {
 		userRow.UserId = utils.GetUuidV4()
-		userRow.Username = "root"
+		userRow.Username = "admin"
 		userRow.Password = utils.EncodePassword("123456")
 		userRow.Status = true
 

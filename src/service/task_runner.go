@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/levigross/grequests"
@@ -11,8 +12,11 @@ import (
 	"github.com/mouday/cron-admin/src/utils"
 )
 
-// 启动消费
-var ch = make(chan string, 10)
+// 等待队列
+var TASK_WAIT_CHANNEL = make(chan string, 10)
+
+// 任务队列，用于去重
+var TASK_MAP sync.Map
 
 func TaskRunner(taskId string) {
 
@@ -71,9 +75,10 @@ func TaskRunner(taskId string) {
 
 func Consumer() {
 	for {
-		taskId, ok := <-ch
+		taskId, ok := <-TASK_WAIT_CHANNEL
 		if ok {
 			TaskRunner(taskId)
+			TASK_MAP.Delete(taskId)
 		} else {
 			break
 		}
@@ -83,5 +88,11 @@ func Consumer() {
 }
 
 func AppendTask(taskId string) {
-	ch <- taskId
+	// 节流操作
+	_, loaded := TASK_MAP.LoadOrStore(taskId, true)
+	if !loaded {
+		TASK_WAIT_CHANNEL <- taskId
+	} else {
+		fmt.Println("任务正在运行：", taskId)
+	}
 }

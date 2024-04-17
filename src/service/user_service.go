@@ -12,7 +12,7 @@ func AddUser() {
 	db := config.GetDB()
 	userRow := model.UserModel{
 		UserId:   utils.GetUuidV4(),
-		Username: "root",
+		Username: "admin",
 		Password: utils.EncodePassword("123456"),
 		Status:   true,
 	}
