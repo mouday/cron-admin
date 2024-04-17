@@ -152,7 +152,11 @@ func RunTask(ctx *gin.Context) {
 	// db := config.GetDB()
 
 	// db.Model(&model.TaskModel{}).Where("task_id = ?", row.TaskId).Find(&row)
-	service.AppendTask(row.TaskId)
+	err := service.AppendTask(row.TaskId)
 
-	vo.Success(ctx, nil)
+	if err != nil {
+		vo.Error(ctx, -1, err.Error())
+	} else {
+		vo.Success(ctx, nil)
+	}
 }

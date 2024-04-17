@@ -87,12 +87,15 @@ func Consumer() {
 	fmt.Println("consumer done")
 }
 
-func AppendTask(taskId string) {
+func AppendTask(taskId string) error {
 	// 节流操作
 	_, loaded := TASK_MAP.LoadOrStore(taskId, true)
 	if !loaded {
 		TASK_WAIT_CHANNEL <- taskId
 	} else {
-		fmt.Println("任务正在运行：", taskId)
+		return fmt.Errorf("任务正在运行：%v", taskId)
+		// fmt.Println("任务正在运行：", taskId)
 	}
+
+	return nil
 }

@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"sync"
 
 	"github.com/mouday/cron-admin/src/config"
@@ -53,7 +54,10 @@ func StartTask(taskId string, cronExpress string) error {
 	// 每秒执行一次
 	cronInstance := cron.New()
 	err := cronInstance.AddFunc(cronExpress, func() {
-		AppendTask(taskId)
+		e := AppendTask(taskId)
+		if e != nil {
+			fmt.Println(e)
+		}
 	})
 
 	if err != nil {
