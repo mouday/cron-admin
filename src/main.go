@@ -18,7 +18,13 @@ var local embed.FS
 
 func main() {
 	// app
+	env := config.GetEnv()
+	if env == "release" {
+		gin.SetMode(gin.ReleaseMode)
+	}
+
 	app := gin.New()
+	app.SetTrustedProxies(nil)
 
 	// 全局异常捕获
 	app.Use(handler.Recover)
@@ -45,8 +51,13 @@ func main() {
 	fp, _ := fs.Sub(local, "public")
 	app.StaticFS("/", http.FS(fp))
 
+	fmt.Println("**********************")
+	fmt.Println("Welcome Use Cron Admin")
+	fmt.Println("server run at: ", "http://127.0.0.1:8082")
+	fmt.Println("**********************")
+
 	// 监听并在 http://127.0.0.1:8082 上启动服务
-	err := app.Run(":8082")
+	err := app.Run("127.0.0.1:8082")
 
 	if err != nil {
 		fmt.Println(err)

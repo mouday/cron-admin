@@ -53,7 +53,12 @@ func TaskRunner(taskId string) {
 	status := enums.TaskStatusRunError
 	if err == nil && resp.Ok {
 		status = enums.TaskStatusRunSuccess
+	} else {
+		AppendLog(taskId, item.TaskLogId, err.Error())
 	}
+
+	// result
+	AppendLog(taskId, item.TaskLogId, resp.String())
 
 	item.Status = status
 
@@ -69,8 +74,6 @@ func TaskRunner(taskId string) {
 
 	db.Model(&model.TaskLogModel{}).Where("task_log_id = ?", item.TaskLogId).Updates(&updateRow)
 
-	// result
-	AppendLog(taskId, item.TaskLogId, resp.String())
 }
 
 func Consumer() {

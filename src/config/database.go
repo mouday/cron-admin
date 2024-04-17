@@ -3,6 +3,7 @@ package config
 import (
 	// "gorm.io/driver/sqlite" // 基于 GGO 的 Sqlite 驱动
 	"github.com/glebarez/sqlite" // 纯 Go 实现的 SQLite 驱动, 详情参考： https://github.com/glebarez/sqlite
+
 	"github.com/mouday/cron-admin/src/model"
 	"github.com/mouday/cron-admin/src/utils"
 	"gorm.io/gorm"
@@ -14,10 +15,19 @@ var SCERET string
 
 // 获取数据库连接
 func GetDB() *gorm.DB {
+	env := GetEnv()
+
+	var level logger.LogLevel
+	if env == "release" {
+		level = logger.Error
+	} else {
+		level = logger.Info
+	}
+
 	db, _ := gorm.Open(sqlite.Open("database.db"), &gorm.Config{
 		// 日志级别
 		// Logger: logger.Default.LogMode(logger.Error),
-		Logger: logger.Default.LogMode(logger.Info),
+		Logger: logger.Default.LogMode(level),
 	})
 
 	return db

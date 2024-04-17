@@ -56,6 +56,7 @@ var ALLOW_URLS = []string{
 	".*\\.css",
 	".*\\.svg",
 	".*\\.ico",
+	".*\\.gif",
 }
 
 func InArray(url string, urls []string) bool {
