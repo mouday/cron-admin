@@ -90,9 +90,13 @@ func RemoveTask(ctx *gin.Context) {
 
 	db.Where("task_id = ?", row.TaskId).Delete(&model.TaskModel{})
 
-	// service.RemoveTask(params.TaskId)
-	// ctx.String(http.StatusOK, "hello")
-	vo.Success(ctx, nil)
+	err := service.ChangeTaskStatus(row.TaskId, false)
+
+	if err != nil {
+		vo.Error(ctx, -1, err.Error())
+	} else {
+		vo.Success(ctx, nil)
+	}
 }
 
 func GetTask(ctx *gin.Context) {
