@@ -1,15 +1,10 @@
 package service
 
 import (
-	"fmt"
 	"sync"
-	"time"
 
-	"github.com/levigross/grequests"
 	"github.com/mouday/cron-admin/src/config"
-	"github.com/mouday/cron-admin/src/enums"
 	"github.com/mouday/cron-admin/src/model"
-	"github.com/mouday/cron-admin/src/utils"
 	"github.com/robfig/cron"
 )
 
@@ -25,7 +20,7 @@ func InitCron() {
 	for index := range list {
 		row := list[index]
 
-		StartTask(row)
+		StartTask(row.TaskId, row.Cron)
 	}
 }
 
@@ -38,39 +33,7 @@ type JobParams struct {
 	Url      string `json:"url" `
 	Title    string `json:"title" `
 	RunnerId string `json:"runnerId" `
-}
-
-func newJob(params JobParams) func() {
-	return func() {
-		now := time.Now()
-		fmt.Println("任务运行：", now.Format(DATATIME_FORMAT))
-
-		item := model.TaskLogModel{}
-		item.TaskLogId = utils.GetUuidV4()
-		item.TaskId = params.TaskId
-		item.Title = params.Title
-		item.RunnerId = params.RunnerId
-		item.TaskName = "run_job"
-
-		// http://httpbin.org/get
-		options := &grequests.RequestOptions{
-			JSON: item,
-		}
-
-		resp, err := grequests.Post("http://127.0.0.1:5000/api/startTask", options)
-
-		status := enums.TaskStatusStartError
-		if err == nil && resp.Ok {
-			status = enums.TaskStatusStartSuccess
-		}
-
-		item.Status = status
-
-		// database
-		db := config.GetDB()
-		db.Create(&item)
-
-	}
+	Method   string `json:"Method" `
 }
 
 func StopTask(taskId string) {
@@ -83,32 +46,38 @@ func StopTask(taskId string) {
 	CronArray.Delete(taskId)
 }
 
-func StartTask(row model.TaskModel) {
+func StartTask(taskId string, cronExpress string) error {
 	// 获取指定cron定时器关闭
-	StopTask(row.TaskId)
-
-	params := JobParams{
-		TaskId: row.TaskId,
-		Cron:   row.Cron,
-		Url:    "",
-		Title:  row.Title,
-	}
+	StopTask(taskId)
 
 	// 每秒执行一次
 	cronInstance := cron.New()
-	cronInstance.AddFunc(params.Cron, newJob(params))
+	err := cronInstance.AddFunc(cronExpress, func() {
+		AppendTask(taskId)
+	})
+
+	if err != nil {
+		return err
+	}
+
 	cronInstance.Start()
 
-	CronArray.Store(row.TaskId, cronInstance)
+	CronArray.Store(taskId, cronInstance)
+
+	return nil
 }
 
-func ChangeTaskStatus(taskId string, status bool) {
+func ChangeTaskStatus(taskId string, status bool) error {
+	var err error
+
 	if status {
 		db := config.GetDB()
 		row := &model.TaskModel{}
 		db.Model(&model.TaskModel{}).Where("task_id = ?", taskId).Find(&row)
-		StartTask(*row)
+		err = StartTask(row.TaskId, row.Cron)
 	} else {
 		StopTask(taskId)
 	}
+
+	return err
 }

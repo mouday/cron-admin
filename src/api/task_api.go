@@ -11,12 +11,13 @@ import (
 )
 
 type TaskForm struct {
-	TaskId   string `json:"taskId"`
-	Title    string `json:"title"`
-	Cron     string `json:"cron" `
-	TaskName string `json:"taskName" `
-	RunnerId string `json:"runnerId" `
-	Status   bool   `json:"status" `
+	TaskId string `json:"taskId"`
+	Title  string `json:"title"`
+	Cron   string `json:"cron" `
+	Url    string `json:"url" `
+	// TaskName string `json:"taskName" `
+	// RunnerId string `json:"runnerId" `
+	Status bool `json:"status" `
 }
 
 func AddTask(ctx *gin.Context) {
@@ -24,20 +25,26 @@ func AddTask(ctx *gin.Context) {
 	ctx.BindJSON(&form)
 
 	row := &model.TaskModel{
-		Title:    form.Title,
-		Cron:     form.Cron,
-		RunnerId: form.RunnerId,
-		TaskName: form.TaskName,
-		Status:   form.Status,
-		TaskId:   utils.GetUuidV4(),
+		Title: form.Title,
+		Cron:  form.Cron,
+		Url:   form.Url,
+		// RunnerId: form.RunnerId,
+		// TaskName: form.TaskName,
+		Status: form.Status,
+		TaskId: utils.GetUuidV4(),
 	}
 
 	db := config.GetDB()
 	db.Model(&model.TaskModel{}).Create(&row)
 
-	service.ChangeTaskStatus(row.TaskId, row.Status)
+	err := service.ChangeTaskStatus(row.TaskId, row.Status)
 
-	vo.Success(ctx, nil)
+	if err != nil {
+		vo.Error(ctx, -1, err.Error())
+	} else {
+		vo.Success(ctx, nil)
+	}
+
 }
 
 func UpdateTask(ctx *gin.Context) {
@@ -47,9 +54,14 @@ func UpdateTask(ctx *gin.Context) {
 	db := config.GetDB()
 	db.Model(&model.TaskModel{}).Where("task_id = ?", row.TaskId).Updates(&row)
 
-	service.ChangeTaskStatus(row.TaskId, row.Status)
+	err := service.ChangeTaskStatus(row.TaskId, row.Status)
 
-	vo.Success(ctx, nil)
+	if err != nil {
+		vo.Error(ctx, -1, err.Error())
+	} else {
+		vo.Success(ctx, nil)
+	}
+
 }
 
 func UpdateTaskStatus(ctx *gin.Context) {
@@ -60,9 +72,14 @@ func UpdateTaskStatus(ctx *gin.Context) {
 
 	db.Model(&model.TaskModel{}).Where("task_id = ?", params.TaskId).Update("status", params.Status)
 
-	service.ChangeTaskStatus(params.TaskId, params.Status)
+	err := service.ChangeTaskStatus(params.TaskId, params.Status)
 
-	vo.Success(ctx, nil)
+	if err != nil {
+		vo.Error(ctx, -1, err.Error())
+	} else {
+		vo.Success(ctx, nil)
+	}
+
 }
 
 func RemoveTask(ctx *gin.Context) {
@@ -121,4 +138,17 @@ func GetTaskList(ctx *gin.Context) {
 		"list":  taskList,
 		"total": count,
 	})
+}
+
+// 运行任务
+func RunTask(ctx *gin.Context) {
+	row := &model.TaskModel{}
+	ctx.BindJSON(&row)
+
+	// db := config.GetDB()
+
+	// db.Model(&model.TaskModel{}).Where("task_id = ?", row.TaskId).Find(&row)
+	service.AppendTask(row.TaskId)
+
+	vo.Success(ctx, nil)
 }

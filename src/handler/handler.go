@@ -3,7 +3,9 @@ package handler
 import (
 	"fmt"
 	"log"
+	"regexp"
 	"runtime/debug"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/mouday/cron-admin/src/config"
@@ -46,14 +48,29 @@ func errorToString(r interface{}) string {
 
 var ALLOW_URLS = []string{
 	"/api/login",
+
+	// 静态文件放行
+	"/",
+	".*\\.html",
+	".*\\.js",
+	".*\\.css",
+	".*\\.svg",
+	".*\\.ico",
 }
 
 func InArray(url string, urls []string) bool {
+
 	for _, v := range urls {
-		if v == url {
+		if strings.Contains(v, "*") {
+			matched, _ := regexp.MatchString(v, url)
+			if matched {
+				return true
+			}
+		} else if v == url {
 			return true
 		}
 	}
+
 	return false
 }
 

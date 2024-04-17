@@ -26,6 +26,7 @@ func RegistRouter(app *gin.Engine) {
 	app.POST("/api/removeTask", api.RemoveTask)
 	app.POST("/api/getTask", api.GetTask)
 	app.POST("/api/getTaskList", api.GetTaskList)
+	app.POST("/api/runTask", api.RunTask)
 	// app.POST("/api/startTask", api.StartTask)
 	// app.POST("/api/stopTask", api.StopTask)
 

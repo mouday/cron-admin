@@ -37,6 +37,9 @@ func main() {
 	// 初始化定时任务
 	service.InitCron()
 
+	// 启动消费者
+	go service.Consumer()
+
 	// 【Go语言】gin + go:embed 打包静态资源文件
 	// ref: https://blog.csdn.net/Regulations/article/details/128858670
 	fp, _ := fs.Sub(local, "public")
