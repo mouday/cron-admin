@@ -1,0 +1,12 @@
+# systemd config
+# /usr/lib/systemd/system/cron-admin.service
+[Unit]
+Description=Cron Admin
+
+[Service]
+WorkingDirectory=/opt/cron-admin
+ExecStart=/opt/cron-admin/cron-admin
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

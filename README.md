@@ -28,7 +28,7 @@ Cron Admin 仅负责定时任务的调度，不负责定时任务的执行
 
 [https://github.com/mouday/cron-admin/releases](https://github.com/mouday/cron-admin/releases)
 
-3、解压文件并启动服务
+2、解压文件并启动服务
 
 ```bash
 # macos: 
