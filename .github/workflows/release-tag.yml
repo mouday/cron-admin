@@ -27,6 +27,10 @@ jobs:
           ref: 'dist'
           token: ${{ secrets.GH_PAT }}
           path: 'src/public'
+      
+      # pattern public/*: cannot embed directory public/.git: invalid name .git
+      - name: Remove Web .git Dir
+        run: rm -rf src/public/.git
 
       - name: Set up Go
         uses: actions/setup-go@v4
