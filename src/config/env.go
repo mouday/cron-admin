@@ -16,7 +16,7 @@ func GetEnv() string {
 
 	if env == "" {
 		// env = "release"
-		env = "debug"
+		env = "release"
 	}
 
 	return env

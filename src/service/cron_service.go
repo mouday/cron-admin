@@ -25,6 +25,8 @@ func InitCron() {
 	}
 }
 
+// https://zhuanlan.zhihu.com/p/480841357
+
 // 容器
 var CronArray sync.Map
 
