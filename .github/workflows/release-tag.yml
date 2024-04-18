@@ -19,6 +19,15 @@ jobs:
       - name: Checkout Master
         uses: actions/checkout@master
 
+      # 拉取web前端dist的代码
+      - name: Checkout Web Dist
+        uses: actions/checkout@v3
+        with:
+          repository: 'mouday/cron-admin-web'
+          ref: 'dist'
+          token: ${{ secrets.GH_PAT }}
+          path: 'src/public'
+
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
