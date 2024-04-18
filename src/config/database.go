@@ -3,6 +3,9 @@ package config
 import (
 	// "gorm.io/driver/sqlite" // 基于 GGO 的 Sqlite 驱动
 	"fmt"
+	"log"
+	"os"
+	"time"
 
 	"github.com/glebarez/sqlite" // 纯 Go 实现的 SQLite 驱动, 详情参考： https://github.com/glebarez/sqlite
 
@@ -26,10 +29,21 @@ func GetDB() *gorm.DB {
 		level = logger.Info
 	}
 
+	newLogger := logger.New(
+		log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
+		logger.Config{
+			SlowThreshold:             time.Second, // Slow SQL threshold
+			LogLevel:                  level,       // Log level
+			IgnoreRecordNotFoundError: true,        // Ignore ErrRecordNotFound error for logger
+			ParameterizedQueries:      false,       // Don't include params in the SQL log
+			Colorful:                  true,        // Disable color
+		},
+	)
+
 	db, _ := gorm.Open(sqlite.Open("database.db"), &gorm.Config{
 		// 日志级别
 		// Logger: logger.Default.LogMode(logger.Error),
-		Logger: logger.Default.LogMode(level),
+		Logger: newLogger,
 	})
 
 	return db
