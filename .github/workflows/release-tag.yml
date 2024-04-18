@@ -1,0 +1,42 @@
+#https://github.com/yyx990803/release-tag
+
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+
+#on:
+#  push:
+#    branch: ['master']
+
+jobs:
+  build:
+    name: Create Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Master
+        uses: actions/checkout@master
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.20'
+ 
+      - name: Build
+        run: make build
+
+      - name: Release
+        run: make release version=${{github.ref_name}}
+
+      - name: Upload Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            ./release/*.gz
+            ./release/*.zip
+          body: Please refer to CHANGELOG.md for details.
+          # note you'll typically need to create a personal access token
+          # with permissions to create releases in the other repo

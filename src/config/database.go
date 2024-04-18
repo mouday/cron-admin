@@ -2,6 +2,8 @@ package config
 
 import (
 	// "gorm.io/driver/sqlite" // 基于 GGO 的 Sqlite 驱动
+	"fmt"
+
 	"github.com/glebarez/sqlite" // 纯 Go 实现的 SQLite 驱动, 详情参考： https://github.com/glebarez/sqlite
 
 	"github.com/mouday/cron-admin/src/model"
@@ -70,16 +72,23 @@ func InitConfigData() {
 
 func InitUserData() {
 	db := GetDB()
+	username := GetAppAdminUsername()
 
 	userRow := &model.UserModel{}
-	db.Model(&model.UserModel{}).Where("username = ?", "admin").First(&userRow)
+
+	db.Model(&model.UserModel{}).Where("username = ?", username).First(&userRow)
 
 	if userRow.Username == "" {
+		password := GetAppAdminPassword()
+
 		userRow.UserId = utils.GetUuidV4()
-		userRow.Username = "admin"
-		userRow.Password = utils.EncodePassword("123456")
+		userRow.Username = username
+		userRow.Password = utils.EncodePassword(password)
 		userRow.Status = true
 
 		db.Model(&model.UserModel{}).Create(userRow)
+
+		fmt.Println("username:", username)
+		fmt.Println("password:", password)
 	}
 }

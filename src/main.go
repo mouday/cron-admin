@@ -16,7 +16,10 @@ import (
 //go:embed public/*
 var local embed.FS
 
+const VERSION = "v1.0.0"
+
 func main() {
+
 	// app
 	env := config.GetEnv()
 	if env == "release" {
@@ -51,13 +54,16 @@ func main() {
 	fp, _ := fs.Sub(local, "public")
 	app.StaticFS("/", http.FS(fp))
 
-	fmt.Println("**********************")
-	fmt.Println("Welcome Use Cron Admin")
-	fmt.Println("server run at: ", "http://127.0.0.1:8082")
-	fmt.Println("**********************")
+	appRunAddress := config.GetAppRunAddress()
+
+	fmt.Println("********************************************")
+	fmt.Println("* Welcome Use Cron Admin ", VERSION)
+	fmt.Println("* server run at: ", "http://"+appRunAddress)
+	fmt.Println("* issue: https://github.com/mouday/cron-admin")
+	fmt.Println("********************************************")
 
 	// 监听并在 http://127.0.0.1:8082 上启动服务
-	err := app.Run("127.0.0.1:8082")
+	err := app.Run(appRunAddress)
 
 	if err != nil {
 		fmt.Println(err)
