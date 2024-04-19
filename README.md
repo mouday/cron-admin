@@ -81,3 +81,8 @@ APP_ADMIN_USERNAME=admin
 # 管理员密码
 APP_ADMIN_PASSWORD=
 ```
+
+## Todo
+
+- [] shell执行
+- [] access token
