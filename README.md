@@ -84,5 +84,4 @@ APP_ADMIN_PASSWORD=
 
 ## Todo
 
-- [] shell执行
 - [] access token
